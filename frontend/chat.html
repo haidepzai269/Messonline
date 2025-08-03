@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trò chuyện</title>
+  <link rel="stylesheet" href="chat.css" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <button class="nav-btn" onclick="location.href='home.html'">Home</button>
+      <button class="nav-btn" onclick="location.href='chat.html'">Chat</button>
+    </aside>
+
+    <!-- Danh sách trò chuyện -->
+    <section class="chat-list">
+      <div id="chat-title" class="chat-title"></div>
+      <input type="text" id="search-input" placeholder="Tìm kiếm..." />
+      <h3>Gợi ý trò chuyện</h3>
+      <ul id="user-suggestions"></ul>
+    </section>
+
+    <!-- Khung chat -->
+    <main class="chat-main">
+      <div id="chat-header" class="chat-header"></div>
+      <div id="chat-messages" class="messages">
+        <div class="skeleton-message"></div>
+        <div class="skeleton-message mine"></div>
+        <div class="skeleton-message"></div>
+      </div>
+      <div id="scrollToBottomBtn" class="scroll-to-bottom">👇</div>
+      <div id="typing-indicator" class="typing-indicator"></div>
+      <div class="chat-input">
+        <!-- Nút upload và input file ẩn -->
+        <button id="uploadBtn">📎</button>
+        <input type="file" id="fileInput" accept="image/*,video/*" style="display: none" />
+      
+        <!-- Ô nhập tin nhắn và nút gửi -->
+        <input type="text" id="message-input" placeholder="Nhập tin nhắn..." />
+        <button id="send-btn">Gửi</button>
+      </div>      
+    </main>
+  </div>
+<!-- Modal xem ảnh toàn màn hình -->
+<div id="imageModal" class="image-modal">
+    <span id="closeModal">&times;</span>
+    <img id="modalImage" src="" alt="Xem ảnh">
+  </div>
+  <div id="chat-notification-container"></div>
+  
+  <script src="chat.js"></script>
+</body>
+</html>
