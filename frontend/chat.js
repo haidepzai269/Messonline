@@ -42,6 +42,7 @@ if (chatWithUser) {
     <span id="user">${chatWithUser.username}</span>
     <small id="user-status-text" style="color:gray;font-size:13px;">Đang kiểm tra...</small>
   </div>
+   <button id="startCallBtnHeader" style="margin-left:auto;font-size:20px;cursor:pointer;">📞</button>
  `;
  socket.emit('check-user-status', { userId: chatWithUser.id });
 
@@ -485,3 +486,293 @@ scrollBtn.addEventListener('click', () => {
     behavior: 'smooth'
   });
 });
+
+
+// gọi video
+// VIDEO CALL
+let peerConnection;
+let localStream;
+let remoteStream;
+const configuration = {
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+};
+
+const callContainer = document.getElementById('call-container');
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+const startCallBtn = document.getElementById('startCallBtn');
+const endCallBtn = document.getElementById('endCallBtn');
+const acceptCallBtn = document.getElementById('acceptCallBtn');
+const rejectCallBtn = document.getElementById('rejectCallBtn');
+
+// 🆕 Thêm nút bật/tắt
+let micEnabled = true;
+let camEnabled = true;
+
+const micBtn = document.createElement('button');
+micBtn.textContent = '🎙️ Mic';
+micBtn.onclick = () => {
+  micEnabled = !micEnabled;
+  localStream.getAudioTracks().forEach(track => (track.enabled = micEnabled));
+  micBtn.textContent = micEnabled ? '🎙️ Mic' : '🔇 Tắt Mic';
+};
+
+const camBtn = document.createElement('button');
+camBtn.textContent = '📷 Cam';
+camBtn.onclick = () => {
+  camEnabled = !camEnabled;
+  localStream.getVideoTracks().forEach(track => (track.enabled = camEnabled));
+  camBtn.textContent = camEnabled ? '📷 Cam' : '📷 Tắt Cam';
+};
+
+startCallBtn.addEventListener('click', async () => {
+  callContainer.innerHTML = ''; 
+  callContainer.style.display = 'flex';
+  showCallerInfo(true);
+
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideo.srcObject = localStream;
+
+    callContainer.appendChild(micBtn);
+    callContainer.appendChild(camBtn);
+
+    peerConnection = createPeerConnection();
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    socket.emit('call-offer', {
+      to: chatWithUser.id,
+      offer
+    });
+
+    endCallBtn.style.display = 'inline-block';
+    startCallBtn.style.display = 'none';
+  } catch (err) {
+    alert('⚠️ Không thể truy cập camera/mic!');
+    callContainer.style.display = 'none';
+  }
+});
+
+
+socket.on('incoming-call', async ({ from, offer }) => {
+   if (from !== chatWithUser.id) return;
+
+   callContainer.style.display = 'flex';
+   showCallerInfo(false); // 🧠 hiển thị người gọi
+   callContainer.classList.add('shake'); // animation
+
+   acceptCallBtn.style.display = 'inline-block';
+   rejectCallBtn.style.display = 'inline-block';
+   startCallBtn.style.display = 'none';
+
+   acceptCallBtn.onclick = async () => {
+     callContainer.classList.remove('shake');
+     acceptCallBtn.style.display = 'none';
+     rejectCallBtn.style.display = 'none';
+     endCallBtn.style.display = 'inline-block';
+
+     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+     localVideo.srcObject = localStream;
+
+     callContainer.appendChild(micBtn);
+     callContainer.appendChild(camBtn);
+
+     peerConnection = createPeerConnection();
+     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+     const answer = await peerConnection.createAnswer();
+     await peerConnection.setLocalDescription(answer);
+
+     socket.emit('call-answer', {
+       to: from,
+       answer
+     });
+   };
+
+   rejectCallBtn.onclick = () => {
+     callContainer.style.display = 'none';
+     socket.emit('call-reject', { to: from });
+   };
+ });
+
+ socket.on('call-answered', async ({ answer }) => {
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+  
+  // 🧠 Thêm đoạn này để hiển thị video phía người gọi
+  remoteStream = new MediaStream();
+  remoteVideo.srcObject = remoteStream;
+
+  peerConnection.ontrack = event => {
+    remoteStream.addTrack(event.track);
+  };
+});
+
+socket.on('ice-candidate', async ({ candidate }) => {
+  if (peerConnection && candidate) {
+    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+});
+
+function createPeerConnection() {
+  const pc = new RTCPeerConnection(configuration);
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      socket.emit('ice-candidate', {
+        to: chatWithUser.id,
+        candidate: event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event => {
+    remoteStream = event.streams[0];
+    remoteVideo.srcObject = remoteStream;
+  };
+
+  return pc;
+}
+
+endCallBtn.addEventListener('click', () => {
+  socket.emit('call-end', { to: chatWithUser.id });
+  closeCallUI();
+});
+
+socket.on('call-ended', () => {
+  closeCallUI();
+});
+
+function closeCallUI() {
+  callContainer.innerHTML = ''; 
+  callContainer.style.display = 'none';
+  callContainer.classList.remove('shake');
+  startCallBtn.style.display = 'inline-block';
+  endCallBtn.style.display = 'none';
+  acceptCallBtn.style.display = 'none';
+  rejectCallBtn.style.display = 'none';
+
+  if (peerConnection) peerConnection.close();
+  if (localStream) localStream.getTracks().forEach(track => track.stop());
+
+  localVideo.srcObject = null;
+  remoteVideo.srcObject = null;
+  micBtn.remove();
+  camBtn.remove();
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'startCallBtnHeader') {
+    document.getElementById('call-container').style.display = 'flex';
+    document.getElementById('startCallBtn').click(); // Gọi nút gốc
+  }
+});
+
+// 🧠 Hiển thị tên & avatar khi gọi
+function showCallerInfo(isCaller) {
+  // XÓA các call-header cũ trước khi thêm mới
+  const oldHeaders = callContainer.querySelectorAll('.call-header');
+  oldHeaders.forEach(el => el.remove());
+
+  let user = isCaller ? chatWithUser : chatWithUser;
+  let infoDiv = document.createElement('div');
+  infoDiv.className = 'call-header';
+  infoDiv.style = 'display:flex;flex-direction:column;align-items:center;color:white;margin-bottom:20px;';
+  infoDiv.innerHTML = `
+    <img src="${user.avatar || 'default-avatar.png'}" style="width:90px;height:90px;border-radius:50%;border:2px solid white;margin-bottom:10px;">
+    <div style="font-size:18px;font-weight:bold;">${user.username}</div>
+    <div>${isCaller ? 'Đang gọi...' : 'Đang có cuộc gọi đến...'}</div>
+  `;
+  callContainer.prepend(infoDiv);
+}
+
+// ======================= CUỘC GỌI XUYÊN CHAT ========================
+
+// 1. Nhận cuộc gọi đến từ người KHÔNG PHẢI người đang chat
+socket.on('incoming-call', async ({ from, offer }) => {
+  const isFromCurrentChat = from === chatWithUser.id;
+  if (!isFromCurrentChat) {
+    // 👉 Lưu vào localStorage để chuyển sang khung chat khi nhận
+    localStorage.setItem('incomingCall', JSON.stringify({ from, offer }));
+    return;
+  }
+});
+
+// 2. Khi load trang, kiểm tra nếu có cuộc gọi đang đến
+window.addEventListener('load', async () => {
+  const incoming = localStorage.getItem('incomingCall');
+  if (incoming) {
+    const { from, offer } = JSON.parse(incoming);
+    localStorage.removeItem('incomingCall');
+
+    // Gọi API lấy thông tin người gọi
+    const res = await fetch(`/api/users/${from}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const user = await res.json();
+
+    // Lưu lại người chat
+    localStorage.setItem('chatWithUser', JSON.stringify(user));
+    window.location.href = 'chat.html'; // Chuyển sang khung chat để nhận
+  }
+});
+
+// 3. Nếu người nhận không trả lời trong 60s
+let callTimeout;
+// socket.on('incoming-call', async ({ from, offer }) => {
+//   const isFromCurrentChat = from === chatWithUser.id;
+//   if (!isFromCurrentChat) {
+//     // Lấy thông tin người gọi để hiển thị popup
+//     const res = await fetch(`/api/users/${from}`, {
+//       headers: { Authorization: `Bearer ${token}` }
+//     });
+//     const caller = await res.json();
+
+//     const accept = confirm(`📞 ${caller.username} đang gọi đến. Nhận không?`);
+//     if (accept) {
+//       localStorage.setItem('chatWithUser', JSON.stringify(caller));
+//       localStorage.setItem('incomingCall', JSON.stringify({ from, offer }));
+//       location.href = 'chat.html';
+//     } else {
+//       socket.emit('call-reject', { to: from });
+//     }
+//     return;
+//   }
+
+//   // Vẫn giữ đoạn gọi hiện tại nếu đúng người
+//   callTimeout = setTimeout(() => {
+//     if (callContainer.style.display === 'flex') {
+//       socket.emit('call-end', { to: from });
+//       closeCallUI();
+//       notifyMissedCall();
+//     }
+//   }, 60000);
+// });
+
+
+async function notifyMissedCall() {
+  const res = await fetch('/api/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      receiver: chatWithUser.id,
+      text: '📵 Cuộc gọi nhỡ'
+    })
+  });
+
+  const data = await res.json();
+
+  appendMessage(chatWithUser.id, '📵 Cuộc gọi nhỡ', data.id, new Date().toISOString());
+
+  socket.emit('sendMessage', {
+    receiver: chatWithUser.id,
+    text: '📵 Cuộc gọi nhỡ'
+  });
+}
+

@@ -205,3 +205,23 @@ exports.getFriends = async (req, res) => {
     res.json(result.rows);
   };
   
+// ✅ Lấy thông tin người dùng theo ID (dùng cho gọi video)
+exports.getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'SELECT id, username, avatar FROM users WHERE id = $1',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('getUserById error:', err);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+};

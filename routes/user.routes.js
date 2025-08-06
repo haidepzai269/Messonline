@@ -27,5 +27,6 @@ router.post('/request/:id', verifyToken, sendFriendRequest);
 router.post('/respond/:id', verifyToken, respondRequest);
 router.post('/unfriend/:id', verifyToken, unfriend);
 router.get('/friends', verifyToken, userController.getFriends);
+router.get('/:id', verifyToken, userController.getUserById);
 
 module.exports = router;

@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trang chủ</title>
   <link rel="stylesheet" href="home.css" />
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -49,7 +50,33 @@
     </div>
   </div>
 
-
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav">
+  <button onclick="location.href='home.html'">🏠</button>
+  <button onclick="location.href='chat.html'">💬</button>
+  <button onclick="document.getElementById('edit-modal').classList.remove('hidden')">👤</button>
+  </div>
+  <div id="unsupported-message" class="hidden">
+    <h2>Xin lỗi , trang không hoạt động</h2>
+    <p>Thiết bị của bạn có màn hình quá nhỏ để sử dụng trang web này.</p>
+  </div>
+  
   <script src="home.js"></script>
+  <script>
+    function checkScreenSize() {
+      const warning = document.getElementById("unsupported-message");
+      if (window.innerWidth < 400) {
+        warning.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      } else {
+        warning.classList.add("hidden");
+        document.body.style.overflow = "";
+      }
+    }
+  
+    window.addEventListener("resize", checkScreenSize);
+    window.addEventListener("DOMContentLoaded", checkScreenSize);
+  </script>
+  
 </body>
 </html>

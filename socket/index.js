@@ -135,7 +135,44 @@ function setupSocket(io) {
           console.error('get-online-friends error:', err);
         }
       });
-
+      // Gọi video 
+      socket.on('call-offer', ({ to, offer }) => {
+        const targetSocketId = onlineUsers.get(to);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit('incoming-call', {
+            from: userId,
+            offer
+          });
+        }
+      });
+      socket.on('call-answer', ({ to, answer }) => {
+        const targetSocketId = onlineUsers.get(to);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit('call-answered', {
+            answer
+          });
+        }
+      });
+      socket.on('ice-candidate', ({ to, candidate }) => {
+        const targetSocketId = onlineUsers.get(to);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit('ice-candidate', {
+            candidate
+          });
+        }
+      });
+      socket.on('call-reject', ({ to }) => {
+        const targetSocketId = onlineUsers.get(to);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit('call-ended');
+        }
+      });
+      socket.on('call-end', ({ to }) => {
+        const targetSocketId = onlineUsers.get(to);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit('call-ended');
+        }
+      });                        
       // ✅ Broadcast khi có người online
       socket.broadcast.emit('user-online', userId);
 
