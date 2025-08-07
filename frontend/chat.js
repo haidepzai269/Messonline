@@ -775,4 +775,3 @@ async function notifyMissedCall() {
     text: '📵 Cuộc gọi nhỡ'
   });
 }
-
