@@ -3,7 +3,7 @@ if (!token) window.location.href = 'auth.html';
 
 // Load hồ sơ chính mình
 async function loadProfile() {
-  const res = await fetch('http://localhost:3000/api/users/me', {
+  const res = await fetch('/api/users/me', {
     headers: { Authorization: `Bearer ${token}` },
   });
   const user = await res.json();
@@ -46,7 +46,7 @@ async function loadUsers() {
   }
 
   // Fetch dữ liệu thật
-  const res = await fetch('http://localhost:3000/api/users/all', {
+  const res = await fetch('/api/users/all', {
       headers: { Authorization: `Bearer ${token}` },
   });
   const users = await res.json();
@@ -131,7 +131,7 @@ async function loadUsers() {
 
   
   async function sendRequest(userId) {
-    await fetch(`http://localhost:3000/api/users/request/${userId}`, {
+    await fetch(`/api/users/request/${userId}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -139,7 +139,7 @@ async function loadUsers() {
   }
   
   async function respondRequest(userId, accepted) {
-    await fetch(`http://localhost:3000/api/users/respond/${userId}`, {
+    await fetch(`/api/users/respond/${userId}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -151,7 +151,7 @@ async function loadUsers() {
   }
   
   async function unfriend(userId) {
-    await fetch(`http://localhost:3000/api/users/unfriend/${userId}`, {
+    await fetch(`/api/users/unfriend/${userId}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -160,7 +160,7 @@ async function loadUsers() {
   
 
 async function toggleFriend(userId) {
-  await fetch(`http://localhost:3000/api/users/toggle-friend/${userId}`, {
+  await fetch(`/api/users/toggle-friend/${userId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -189,7 +189,7 @@ document.getElementById('edit-profile').addEventListener('click', () => {
     if (bio) formData.append('bio', bio);
     if (avatar) formData.append('avatar', avatar);
   
-    const res = await fetch('http://localhost:3000/api/users/update', {
+    const res = await fetch('/api/users/update', {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -219,7 +219,7 @@ document.getElementById('close-avatar-modal').addEventListener('click', () => {
   });
 
 // socket gửi lời mời
-const socket = io('http://localhost:3000', {
+const socket = io({
     auth: { token }
   });
   

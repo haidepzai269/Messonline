@@ -29,7 +29,7 @@ loadMyInfo();
 
 const myId = getMyIdFromToken();
 const chatWithUser = JSON.parse(localStorage.getItem('chatWithUser'));
-const socket = io("http://localhost:3000", { auth: { token } });
+const socket = io({ auth: { token } });
 
 // ✅ Khai báo msgBox
 const msgBox = document.getElementById('chat-messages');
@@ -386,7 +386,7 @@ let onlineFriendIds = new Set();
 
 // Load danh sách bạn bè
 async function loadFriends() {
-  const res = await fetch('http://localhost:3000/api/users/friends', {
+  const res = await fetch('/api/users/friends', {
     headers: { Authorization: `Bearer ${token}` }
   });
   const friends = await res.json();

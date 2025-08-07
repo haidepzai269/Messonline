@@ -16,7 +16,7 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
 
   const endpoint = isLogin ? 'login' : 'register';
 
-  const res = await fetch(`http://localhost:3000/api/auth/${endpoint}`, {
+  const res = await fetch(`/api/auth/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
