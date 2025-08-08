@@ -7,7 +7,9 @@ exports.sendMessage = async (req, res) => {
 
   try {
     const result = await pool.query(
-      'INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING id, sender_id, receiver_id, content, created_at',
+      `INSERT INTO messages (sender_id, receiver_id, content, seen)
+       VALUES ($1, $2, $3, false)
+       RETURNING id, sender_id, receiver_id, content, created_at, seen`,
       [senderId, receiver, text]
     );
     res.json(result.rows[0]);
@@ -44,8 +46,10 @@ exports.sendFileMessage = async (req, res) => {
 
   try {
     const result = await pool.query(
-      'INSERT INTO messages (sender_id, receiver_id, file_url, file_type) VALUES ($1, $2, $3, $4) RETURNING id, sender_id, receiver_id, file_url, file_type, created_at',
-      [senderId, receiver, file.path, file.mimetype.startsWith('video') ? 'video' : 'image']
+      `INSERT INTO messages (sender_id, receiver_id, file_url, file_type, seen)
+       VALUES ($1, $2, $3, $4, false)
+       RETURNING id, sender_id, receiver_id, file_url, file_type, created_at, seen`,
+      [senderId, receiver, file.path, fileType]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -94,4 +98,39 @@ exports.deleteMessage = async (req, res) => {
       return res.status(500).json({ error: 'Lỗi xóa tin nhắn' });
     }
   };
+  
+
+  // exports.markMessageAsSeen = async (req, res) => {
+  //   const myId = req.user.id;
+  //   const { messageId } = req.body;
+  
+  //   try {
+  //     const result = await pool.query(
+  //       `UPDATE messages 
+  //        SET seen = true 
+  //        WHERE id = $1 AND receiver_id = $2
+  //        RETURNING id, sender_id`,
+  //       [messageId, myId]
+  //     );
+  
+  //     if (result.rowCount === 0) {
+  //       return res.status(404).json({ error: 'Không tìm thấy tin nhắn hoặc bạn không phải người nhận' });
+  //     }
+  
+  //     const { sender_id } = result.rows[0];
+  
+  //     // ✅ Gửi socket thông báo cho người gửi (real-time)
+  //     const io = getIO();
+  //     const senderSocketId = onlineUsers.get(sender_id);
+  //     if (senderSocketId) {
+  //       io.to(senderSocketId).emit('messageSeenByReceiver', { messageId });
+  //     }
+  
+  //     res.json({ success: true });
+  //   } catch (err) {
+  //     console.error('🔥 markMessageAsSeen error:', err);
+  //     res.status(500).json({ error: 'Lỗi cập nhật trạng thái đã xem' });
+  //   }
+  // };
+  
   

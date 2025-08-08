@@ -318,3 +318,20 @@ function showProfilePopup(user, buttonElement) {
 }
 
 
+//
+// Hiển thị hiệu ứng chữ "ChatWeb" nếu vừa đăng nhập
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('justLoggedIn') === 'true') {
+    const overlay = document.getElementById('login-effect-overlay');
+    overlay.classList.remove('hidden');
+
+    setTimeout(() => {
+      overlay.classList.add('fade-out');
+      setTimeout(() => {
+        overlay.remove(); // Xóa khỏi DOM
+      }, 1000); // Sau khi mờ đi
+    }, 2000); // Thời gian hiển thị chữ "ChatWeb"
+
+    localStorage.removeItem('justLoggedIn'); // ✅ Xóa để không lặp lại
+  }
+});

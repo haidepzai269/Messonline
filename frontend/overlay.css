@@ -1,0 +1,49 @@
+/* Hiệu ứng chữ glow khi đăng nhập */
+.login-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+}
+
+.glow-text {
+  font-size: 64px;
+  font-weight: bold;
+  font-family: 'Segoe UI', sans-serif;
+  color: #fff;
+  background: linear-gradient(90deg, #42a5f5, #7e57c2, #ff4081);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glow 3s linear forwards, fadeOut 0.5s ease 2.8s forwards;
+}
+
+@keyframes glow {
+  0% {
+    letter-spacing: 2px;
+    filter: blur(5px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    letter-spacing: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

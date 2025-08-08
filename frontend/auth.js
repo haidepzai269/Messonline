@@ -30,6 +30,7 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   }
 
   localStorage.setItem('token', data.token);
+  localStorage.setItem('justLoggedIn', 'true');
   window.location.href = 'home.html';
 });
 // Lắng nghe phím Enter để tự động bấm nút đăng nhập/đăng ký

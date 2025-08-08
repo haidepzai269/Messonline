@@ -8,6 +8,14 @@
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
+  <!-- Hiệu ứng chữ khi vừa đăng nhập -->
+  <div id="login-effect-overlay" class="login-effect hidden">
+    <svg viewBox="0 0 600 100" class="draw-text">
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">ChatWeb</text>
+    </svg>
+  </div>
+  
+
   <div class="wrapper">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -60,8 +68,9 @@
     <h2>Xin lỗi , trang không hoạt động</h2>
     <p>Thiết bị của bạn có màn hình quá nhỏ để sử dụng trang web này.</p>
   </div>
-  
-  <script    src="home.js"></script>
+
+  <link rel="stylesheet" href="overlay.css" />
+  <script src="home.js"></script>
   <script>
     function checkScreenSize() {
       const warning = document.getElementById("unsupported-message");

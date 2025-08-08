@@ -488,8 +488,8 @@ scrollBtn.addEventListener('click', () => {
 });
 
 
-// gọi video
-// VIDEO CALL
+/*
+//  CALL
 let peerConnection;
 let localStream;
 let remoteStream;
@@ -719,40 +719,6 @@ window.addEventListener('load', async () => {
     window.location.href = 'chat.html'; // Chuyển sang khung chat để nhận
   }
 });
-
-// 3. Nếu người nhận không trả lời trong 60s
-let callTimeout;
-// socket.on('incoming-call', async ({ from, offer }) => {
-//   const isFromCurrentChat = from === chatWithUser.id;
-//   if (!isFromCurrentChat) {
-//     // Lấy thông tin người gọi để hiển thị popup
-//     const res = await fetch(`/api/users/${from}`, {
-//       headers: { Authorization: `Bearer ${token}` }
-//     });
-//     const caller = await res.json();
-
-//     const accept = confirm(`📞 ${caller.username} đang gọi đến. Nhận không?`);
-//     if (accept) {
-//       localStorage.setItem('chatWithUser', JSON.stringify(caller));
-//       localStorage.setItem('incomingCall', JSON.stringify({ from, offer }));
-//       location.href = 'chat.html';
-//     } else {
-//       socket.emit('call-reject', { to: from });
-//     }
-//     return;
-//   }
-
-//   // Vẫn giữ đoạn gọi hiện tại nếu đúng người
-//   callTimeout = setTimeout(() => {
-//     if (callContainer.style.display === 'flex') {
-//       socket.emit('call-end', { to: from });
-//       closeCallUI();
-//       notifyMissedCall();
-//     }
-//   }, 60000);
-// });
-
-
 async function notifyMissedCall() {
   const res = await fetch('/api/messages', {
     method: 'POST',
@@ -775,3 +741,4 @@ async function notifyMissedCall() {
     text: '📵 Cuộc gọi nhỡ'
   });
 }
+*/
