@@ -290,7 +290,9 @@ border-radius: 2px;
 #edit-profile:active {
   transform: scale(0.97);
 }
-
+#edit-avatar{
+  border-radius: 5px;
+}
 
 
 /* Modal overlay */
@@ -736,7 +738,9 @@ box-shadow: 0 0 4px rgba(0,0,0,0.3);
     background-position: 200% 0;
   }
 }
-
+.mobile-nav {
+  display: none;
+}
 
 /* --- Responsive cho mobile --- */
 @media screen and (max-width: 768px) {
